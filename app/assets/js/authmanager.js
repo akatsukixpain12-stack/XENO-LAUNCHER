@@ -19,22 +19,6 @@ const Lang = require('./langloader')
 
 const log = LoggerUtil.getLogger('AuthManager')
 
-/**
- * Add a Google Account for Launcher Services.
- */
-exports.addGoogleAccount = async function(authCode) {
-    try {
-        // In a real scenario, you would exchange this code for a token 
-        // with your backend or Google's OAuth API.
-        log.info('Exchanging Google Auth Code...')
-        // Store in ConfigManager similar to Microsoft
-        return { success: true, type: 'google' }
-    } catch (err) {
-        log.error('Google Auth Failed', err)
-        return Promise.reject(err)
-    }
-}
-
 // Error messages
 
 function microsoftErrorDisplayable(errorCode) {
