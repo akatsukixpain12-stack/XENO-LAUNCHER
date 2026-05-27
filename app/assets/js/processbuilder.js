@@ -515,7 +515,7 @@ class ProcessBuilder {
                         case 'user_type':
                             if (this.authUser.type === 'microsoft') val = 'msa'
                             else if (this.authUser.type === 'mojang') val = 'mojang'
-                            else val = 'legacy'
+                            else val = 'mojang' // Setting to mojang with token '0' suppresses many 'Demo' UI locks
                             break
                         case 'version_type':
                             val = this.vanillaManifest.type
@@ -530,7 +530,7 @@ class ProcessBuilder {
                             val = args[i].replace(argDiscovery, tempNativePath)
                             break
                         case 'launcher_name':
-                            val = args[i].replace(argDiscovery, 'Xeno-Launcher')
+                            val = args[i].replace(argDiscovery, 'Xeno Launcher Pro')
                             break
                         case 'launcher_version':
                             val = args[i].replace(argDiscovery, this.launcherVersion)

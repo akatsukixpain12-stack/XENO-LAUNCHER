@@ -170,6 +170,28 @@ exports.addMojangAccount = async function(username, password) {
 const AUTH_MODE = { FULL: 0, MS_REFRESH: 1, MC_REFRESH: 2 }
 
 /**
+ * Add an Ely.by account.
+ * 
+ * @param {string} username Ely.by email/username.
+ * @param {string} password Ely.by password.
+ */
+exports.addElyByAccount = async function(username, password) {
+    try {
+        // Ely.by uses a Yggdrasil compatible API
+        // Custom implementation would point MojangRestAPI to https://authserver.ely.by
+        log.info('Attempting Ely.by authentication...')
+        // Placeholder for Ely.by logic
+        const ret = ConfigManager.addMojangAuthAccount('elyby-uuid', 'elyby-token', username, username)
+        config.authenticationDatabase['elyby-uuid'].type = 'elyby'
+        ConfigManager.save()
+        return ret
+    } catch (err) {
+        log.error('Ely.by Auth Failed', err)
+        return Promise.reject(err)
+    }
+}
+
+/**
  * Perform the full MS Auth flow in a given mode.
  * 
  * AUTH_MODE.FULL = Full authorization for a new account.

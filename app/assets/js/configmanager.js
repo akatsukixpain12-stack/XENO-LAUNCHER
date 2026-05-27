@@ -361,12 +361,29 @@ exports.addOfflineAuthAccount = function(username){
     config.selectedAccount = uuid
     config.authenticationDatabase[uuid] = {
         type: 'offline',
-        accessToken: '0',
+        accessToken: '0', // Global offline bypass token
         username: username.trim(),
         uuid: uuid,
         displayName: username.trim()
     }
     return config.authenticationDatabase[uuid]
+}
+
+/**
+ * Renames an existing offline account.
+ * 
+ * @param {string} uuid The UUID of the account.
+ * @param {string} newUsername The new username.
+ */
+exports.renameOfflineAccount = function(uuid, newUsername) {
+    if (config.authenticationDatabase[uuid] && config.authenticationDatabase[uuid].type === 'offline') {
+        const name = newUsername.trim()
+        config.authenticationDatabase[uuid].username = name
+        config.authenticationDatabase[uuid].displayName = name
+        // We don't change the UUID to keep settings tied to the "slot"
+        return config.authenticationDatabase[uuid]
+    }
+    return null
 }
 
 /**

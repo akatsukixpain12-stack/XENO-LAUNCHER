@@ -32,6 +32,13 @@ LangLoader.setupLanguage()
 function onDistroLoad(data){
     if(data != null){
         
+        // Ensure a default offline account exists to bypass the login screen ("Cracked" mode)
+        if(ConfigManager.getSelectedAccount() == null){
+            logger.info('No account selected, creating a default offline account..')
+            ConfigManager.addOfflineAuthAccount('Player')
+            ConfigManager.save()
+        }
+
         // Resolve the selected server if its value has yet to be set.
         if(ConfigManager.getSelectedServer() == null || data.getServerById(ConfigManager.getSelectedServer()) == null){
             logger.info('Determining default selected server..')

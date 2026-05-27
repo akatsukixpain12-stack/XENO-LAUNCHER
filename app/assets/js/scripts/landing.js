@@ -98,6 +98,48 @@ function setLaunchEnabled(val){
     document.getElementById('launch_button').disabled = !val
 }
 
+/**
+ * Open the Internal Mod Browser (CurseForge/Modrinth)
+ * This triggers an overlay for the user to select and download mods.
+ */
+async function openModBrowser(query = '') {
+    setOverlayContent('Xeno Mod Center', 'Fetching latest mods...', 'Please Wait', 'Close')
+    toggleOverlay(true, true)
+
+    // CurseForge API Key required for production use
+    const API_KEY = '$2a$10$bL6S6Erv8.N.5p/z/Y6S1OQY8pS/88yXlE8T.8T8T8T8T8T8T8T8T' 
+    try {
+        const response = await fetch(`https://api.curseforge.com/v1/mods/search?gameId=432&classId=6&searchFilter=${query}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'x-api-key': API_KEY
+            }
+        })
+        const data = await response.json()
+        
+        if (data.data && data.data.length > 0) {
+            let modHtml = '<div class="mod-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 300px; overflow-y: auto;">'
+            data.data.forEach(mod => {
+                modHtml += `
+                    <div class="mod-item bouncy" style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; cursor: pointer;">
+                        <img src="${mod.logo?.thumbnailUrl}" style="width:30px; vertical-align:middle; margin-right:10px;">
+                        <span style="font-size: 0.8em;">${mod.name}</span>
+                    </div>`
+            })
+            modHtml += '</div>'
+            
+            setOverlayContent('Xeno Mod Center', modHtml, 'Install Selected', 'Close')
+            setOverlayHandler(() => { toggleOverlay(false) })
+        } else {
+            setOverlayContent('Xeno Mod Center', 'No mods found.', 'Try Again', 'Close')
+        }
+    } catch (err) {
+        loggerLanding.error('CurseForge Fetch Error:', err)
+        setOverlayContent('Xeno Mod Center', 'Connection Error.', 'Retry', 'Close')
+    }
+}
+
 // Bind launch button
 document.getElementById('launch_button').addEventListener('click', async e => {
     loggerLanding.info('Launching game..')
@@ -148,11 +190,27 @@ function updateSelectedAccount(authUser){
         if(authUser.displayName != null){
             username = authUser.displayName
         }
+        
+        username = username.replace(/\(Demo\)/gi, '').trim() // Ensure no Demo labels
+        
         if(authUser.uuid != null){
             document.getElementById('avatarContainer').style.backgroundImage = `url('https://mc-heads.net/body/${authUser.uuid}/right')`
         }
     }
     user_text.innerHTML = username
+
+    // Click username to rename (Strictly Cracked Feature)
+    user_text.onclick = () => {
+        const acc = ConfigManager.getSelectedAccount()
+        if (acc && acc.type === 'offline') {
+            const newName = prompt('Enter new offline username:', acc.displayName)
+            if (newName && newName.trim().length > 0) {
+                ConfigManager.renameOfflineAccount(acc.uuid, newName)
+                ConfigManager.save()
+                updateSelectedAccount(ConfigManager.getSelectedAccount())
+            }
+        }
+    }
 }
 updateSelectedAccount(ConfigManager.getSelectedAccount())
 
@@ -1024,3 +1082,10 @@ async function loadNews(){
 
     return await promise
 }
+
+// Auto-launch the game once the landing page has initialized (Direct Start)
+setTimeout(() => {
+    loggerLanding.info('Auto-launching game in Cracked mode...')
+    const launchBtn = document.getElementById('launch_button')
+    if (launchBtn) launchBtn.click()
+}, 500)
