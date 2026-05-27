@@ -74,7 +74,7 @@ class ProcessBuilder {
         // Hide access token
         const loggableArgs = [...args]
         const tokenIndex = loggableArgs.findIndex(x => x === this.authUser.accessToken)
-        if (tokenIndex > -1) {
+        if (tokenIndex > -1 && this.authUser.accessToken !== '0') {
             loggableArgs[tokenIndex] = '**********'
         }
 
@@ -513,7 +513,9 @@ class ProcessBuilder {
                             val = this.authUser.accessToken
                             break
                         case 'user_type':
-                            val = this.authUser.type === 'microsoft' ? 'msa' : 'mojang'
+                            if (this.authUser.type === 'microsoft') val = 'msa'
+                            else if (this.authUser.type === 'mojang') val = 'mojang'
+                            else val = 'legacy'
                             break
                         case 'version_type':
                             val = this.vanillaManifest.type

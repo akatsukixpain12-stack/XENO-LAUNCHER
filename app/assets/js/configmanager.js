@@ -351,6 +351,25 @@ exports.addMojangAuthAccount = function(uuid, accessToken, username, displayName
 }
 
 /**
+ * Adds an offline (cracked) account.
+ * 
+ * @param {string} username The desired display name.
+ */
+exports.addOfflineAuthAccount = function(username){
+    const uuid = crypto.createHash('md5').update('OfflinePlayer:' + username).digest('hex')
+    
+    config.selectedAccount = uuid
+    config.authenticationDatabase[uuid] = {
+        type: 'offline',
+        accessToken: '0',
+        username: username.trim(),
+        uuid: uuid,
+        displayName: username.trim()
+    }
+    return config.authenticationDatabase[uuid]
+}
+
+/**
  * Update the tokens of an authenticated microsoft account.
  * 
  * @param {string} uuid The uuid of the authenticated account.
