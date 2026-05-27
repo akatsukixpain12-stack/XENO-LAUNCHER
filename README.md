@@ -72,7 +72,6 @@ Ensure that you have the console tab selected. Do not paste anything into the co
 
 If you want to export the console output, simply right click anywhere on the console and click **Save as..**
 
-![console example](https://i.imgur.com/T5e73jP.png)
 
 
 ## Development
@@ -91,7 +90,7 @@ This section details the setup of a basic developmentment environment.
 
 ```console
 > git clone https://github.com/dscalzi/HeliosLauncher.git
-> cd HeliosLauncher
+> cd XENOLauncher
 > npm install
 ```
 
@@ -192,7 +191,6 @@ For instructions on setting up Microsoft Authentication, see https://github.com/
 
 The best way to contact the developers is on Discord.
 
-[![discord](https://discordapp.com/api/guilds/211524927831015424/embed.png?style=banner3)][discord]
 
 ---
 
