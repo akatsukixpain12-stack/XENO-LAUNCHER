@@ -1,31 +1,27 @@
 const remoteMain = require('@electron/remote/main')
 remoteMain.initialize()
 
-// Requirements
 const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron')
-const autoUpdater                       = require('electron-updater').autoUpdater
-const ejse                              = require('ejs-electron')
-const fs                                = require('fs')
-const isDev                             = require('./app/assets/js/isdev')
-const path                              = require('path')
-const semver                            = require('semver')
-const { pathToFileURL }                 = require('url')
+const autoUpdater = require('electron-updater').autoUpdater
+const ejse = require('ejs-electron')
+const fs = require('fs')
+const isDev = require('./app/assets/js/isdev')
+const path = require('path')
+const semver = require('semver')
+const crypto = require('crypto')
+const { pathToFileURL } = require('url')
 const { AZURE_CLIENT_ID, MSFT_OPCODE, MSFT_REPLY_TYPE, MSFT_ERROR, SHELL_OPCODE } = require('./app/assets/js/ipcconstants')
-const LangLoader                        = require('./app/assets/js/langloader')
+const LangLoader = require('./app/assets/js/langloader')
 
-// Setup Lang
 LangLoader.setupLanguage()
 
-// Setup auto updater.
-function initAutoUpdater(event, data) {
+// ==================== AUTO UPDATER ====================
 
+function initAutoUpdater(event, data) {
     if(data){
         autoUpdater.allowPrerelease = true
-    } else {
-        // Defaults to true if application version contains prerelease components (e.g. 0.12.1-alpha.1)
-        // autoUpdater.allowPrerelease = true
     }
-    
+
     if(isDev){
         autoUpdater.autoInstallOnAppQuit = false
         autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml')
@@ -47,10 +43,9 @@ function initAutoUpdater(event, data) {
     })
     autoUpdater.on('error', (err) => {
         event.sender.send('autoUpdateNotification', 'realerror', err)
-    }) 
+    })
 }
 
-// Open channel to listen for update actions.
 ipcMain.on('autoUpdateAction', (event, arg, data) => {
     switch(arg){
         case 'initAutoUpdater':
@@ -84,34 +79,114 @@ ipcMain.on('autoUpdateAction', (event, arg, data) => {
             break
     }
 })
-// Redirect distribution index event from preloader to renderer.
+
 ipcMain.on('distributionIndexDone', (event, res) => {
     event.sender.send('distributionIndexDone', res)
 })
 
-// Handle trash item.
 ipcMain.handle(SHELL_OPCODE.TRASH_ITEM, async (event, ...args) => {
     try {
         await shell.trashItem(args[0])
-        return {
-            result: true
-        }
+        return { result: true }
     } catch(error) {
-        return {
-            result: false,
-            error: error
-        }
+        return { result: false, error: error }
     }
 })
 
-// Disable hardware acceleration.
-// https://electronjs.org/docs/tutorial/offscreen-rendering
 app.disableHardwareAcceleration()
 
+// ==================== ELY.BY AUTH ====================
+
+async function postJson(url, json) {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(json)
+    })
+    const contentType = response.headers.get('content-type')
+    const isJson = contentType && contentType.includes('application/json')
+    const data = isJson ? await response.json() : await response.text()
+    if (!response.ok) {
+        throw new Error(typeof data === 'string' ? data : (data.errorMessage || JSON.stringify(data)))
+    }
+    return data
+}
+
+ipcMain.handle('elyby-login', async (event, username, password) => {
+    try {
+        const data = await postJson('https://authserver.ely.by/auth/authenticate', {
+            username,
+            password,
+            clientToken: crypto.randomUUID(),
+            requestUser: true
+        })
+        return {
+            success: true,
+            username: data.selectedProfile.name,
+            uuid: data.selectedProfile.id,
+            accessToken: data.accessToken
+        }
+    } catch(err) {
+        return { success: false, error: err.message }
+    }
+})
+
+ipcMain.handle('elyby-refresh', async (event, accessToken, clientToken) => {
+    try {
+        const data = await postJson('https://authserver.ely.by/auth/refresh', {
+            accessToken,
+            clientToken,
+            requestUser: true
+        })
+        return {
+            success: true,
+            username: data.selectedProfile?.name,
+            uuid: data.selectedProfile?.id,
+            accessToken: data.accessToken
+        }
+    } catch(err) {
+        return { success: false, error: err.message }
+    }
+})
+
+ipcMain.handle('elyby-invalidate', async (event, accessToken, clientToken) => {
+    try {
+        await postJson('https://authserver.ely.by/auth/invalidate', {
+            accessToken,
+            clientToken
+        })
+        return { success: true }
+    } catch(err) {
+        return { success: false, error: err.message }
+    }
+})
+
+// ==================== VERSION MANIFEST ====================
+
+ipcMain.handle('fetch-version-manifest', async () => {
+    try {
+        const response = await fetch('https://piston-meta.mojang.com/mc/game/version_manifest_v2.json')
+        const data = await response.json()
+        return { success: true, data }
+    } catch(err) {
+        return { success: false, error: err.message }
+    }
+})
+
+ipcMain.handle('fetch-version-details', async (event, url) => {
+    try {
+        const response = await fetch(url)
+        const data = await response.json()
+        return { success: true, data }
+    } catch(err) {
+        return { success: false, error: err.message }
+    }
+})
+
+// ==================== MICROSOFT AUTH ====================
 
 const REDIRECT_URI_PREFIX = 'https://login.microsoftonline.com/common/oauth2/nativeclient?'
 
-// Microsoft Auth Login
 let msftAuthWindow
 let msftAuthSuccess
 let msftAuthViewSuccess
@@ -125,12 +200,12 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGIN, (ipcEvent, ...arguments_) => {
     msftAuthViewSuccess = arguments_[0]
     msftAuthViewOnClose = arguments_[1]
     msftAuthWindow = new BrowserWindow({
-        title: LangLoader.queryJS('index.microsoftLoginTitle'),
+        title: 'Microsoft Login',
         backgroundColor: '#222222',
         width: 520,
         height: 600,
         frame: true,
-        icon: getPlatformIcon('SealCircle')
+        icon: getPlatformIcon('XenoIcon')
     })
 
     msftAuthWindow.on('closed', () => {
@@ -146,13 +221,10 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGIN, (ipcEvent, ...arguments_) => {
     msftAuthWindow.webContents.on('did-navigate', (_, uri) => {
         if (uri.startsWith(REDIRECT_URI_PREFIX)) {
             let queryMap = {}
-            
             new URL(uri).searchParams.forEach((v, k) => {
-                queryMap[k] = v;
-            });
-
+                queryMap[k] = v
+            })
             ipcEvent.reply(MSFT_OPCODE.REPLY_LOGIN, MSFT_REPLY_TYPE.SUCCESS, queryMap, msftAuthViewSuccess)
-
             msftAuthSuccess = true
             msftAuthWindow.close()
             msftAuthWindow = null
@@ -163,7 +235,6 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGIN, (ipcEvent, ...arguments_) => {
     msftAuthWindow.loadURL(`https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?prompt=select_account&client_id=${AZURE_CLIENT_ID}&response_type=code&scope=XboxLive.signin%20offline_access&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient`)
 })
 
-// Microsoft Auth Logout
 let msftLogoutWindow
 let msftLogoutSuccess
 let msftLogoutSuccessSent
@@ -176,12 +247,12 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGOUT, (ipcEvent, uuid, isLastAccount) => {
     msftLogoutSuccess = false
     msftLogoutSuccessSent = false
     msftLogoutWindow = new BrowserWindow({
-        title: LangLoader.queryJS('index.microsoftLogoutTitle'),
+        title: 'Microsoft Logout',
         backgroundColor: '#222222',
         width: 520,
         height: 600,
         frame: true,
-        icon: getPlatformIcon('SealCircle')
+        icon: getPlatformIcon('XenoIcon')
     })
 
     msftLogoutWindow.on('closed', () => {
@@ -196,7 +267,7 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGOUT, (ipcEvent, uuid, isLastAccount) => {
             ipcEvent.reply(MSFT_OPCODE.REPLY_LOGOUT, MSFT_REPLY_TYPE.SUCCESS, uuid, isLastAccount)
         }
     })
-    
+
     msftLogoutWindow.webContents.on('did-navigate', (_, uri) => {
         if(uri.startsWith('https://login.microsoftonline.com/common/oauth2/v2.0/logoutsession')) {
             msftLogoutSuccess = true
@@ -205,7 +276,6 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGOUT, (ipcEvent, uuid, isLastAccount) => {
                     msftLogoutSuccessSent = true
                     ipcEvent.reply(MSFT_OPCODE.REPLY_LOGOUT, MSFT_REPLY_TYPE.SUCCESS, uuid, isLastAccount)
                 }
-
                 if(msftLogoutWindow) {
                     msftLogoutWindow.close()
                     msftLogoutWindow = null
@@ -213,28 +283,29 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGOUT, (ipcEvent, uuid, isLastAccount) => {
             }, 5000)
         }
     })
-    
+
     msftLogoutWindow.removeMenu()
     msftLogoutWindow.loadURL('https://login.microsoftonline.com/common/oauth2/v2.0/logout')
 })
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
+// ==================== WINDOW ====================
+
 let win
 
 function createWindow() {
-
     win = new BrowserWindow({
-        width: 980,
-        height: 552,
-        icon: getPlatformIcon('SealCircle'),
+        width: 1280,
+        height: 720,
+        minWidth: 960,
+        minHeight: 540,
+        icon: getPlatformIcon('XenoIcon'),
         frame: false,
         webPreferences: {
             preload: path.join(__dirname, 'app', 'assets', 'js', 'preloader.js'),
             nodeIntegration: true,
             contextIsolation: false
         },
-        backgroundColor: '#171614'
+        backgroundColor: '#0d0d0f'
     })
     remoteMain.enable(win.webContents)
 
@@ -245,13 +316,7 @@ function createWindow() {
     Object.entries(data).forEach(([key, val]) => ejse.data(key, val))
 
     win.loadURL(pathToFileURL(path.join(__dirname, 'app', 'app.ejs')).toString())
-
-    /*win.once('ready-to-show', () => {
-        win.show()
-    })*/
-
     win.removeMenu()
-
     win.resizable = true
 
     win.on('closed', () => {
@@ -260,10 +325,7 @@ function createWindow() {
 }
 
 function createMenu() {
-    
     if(process.platform === 'darwin') {
-
-        // Extend default included application menu to continue support for quit keyboard shortcut
         let applicationSubMenu = {
             label: 'Application',
             submenu: [{
@@ -274,13 +336,10 @@ function createMenu() {
             }, {
                 label: 'Quit',
                 accelerator: 'Command+Q',
-                click: () => {
-                    app.quit()
-                }
+                click: () => { app.quit() }
             }]
         }
 
-        // New edit menu adds support for text-editing keyboard shortcuts
         let editSubMenu = {
             label: 'Edit',
             submenu: [{
@@ -312,15 +371,8 @@ function createMenu() {
             }]
         }
 
-        // Bundle submenus into a single template and build a menu object with it
-        let menuTemplate = [applicationSubMenu, editSubMenu]
-        let menuObject = Menu.buildFromTemplate(menuTemplate)
-
-        // Assign it to the application
-        Menu.setApplicationMenu(menuObject)
-
+        Menu.setApplicationMenu(Menu.buildFromTemplate([applicationSubMenu, editSubMenu]))
     }
-
 }
 
 function getPlatformIcon(filename){
@@ -335,7 +387,6 @@ function getPlatformIcon(filename){
             ext = 'png'
             break
     }
-
     return path.join(__dirname, 'app', 'assets', 'images', `${filename}.${ext}`)
 }
 
@@ -343,17 +394,13 @@ app.on('ready', createWindow)
 app.on('ready', createMenu)
 
 app.on('window-all-closed', () => {
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
+    if(process.platform !== 'darwin') {
         app.quit()
     }
 })
 
 app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (win === null) {
+    if(win === null) {
         createWindow()
     }
 })

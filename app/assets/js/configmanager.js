@@ -1,6 +1,5 @@
 const fs   = require('fs-extra')
 const { LoggerUtil } = require('helios-core')
-const crypto = require('crypto')
 const os   = require('os')
 const path = require('path')
 
@@ -8,7 +7,7 @@ const logger = LoggerUtil.getLogger('ConfigManager')
 
 const sysRoot = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
 
-const dataPath = path.join(sysRoot, '.helioslauncher')
+const dataPath = path.join(sysRoot, '.xenolauncher')
 
 const launcherDir = require('@electron/remote').app.getPath('userData')
 
@@ -351,22 +350,42 @@ exports.addMojangAuthAccount = function(uuid, accessToken, username, displayName
 }
 
 /**
- * Adds an offline (cracked) or alternative auth account.
- * 
- * @param {string} username The desired display name.
- * @param {string} type The account type ('offline' or 'ely')
- * @param {string} accessToken Optional token for alternative services.
+ * Adds an authenticated Ely.by account to the database.
+ *
+ * @param {string} uuid The uuid of the authenticated account.
+ * @param {string} accessToken The access token.
+ * @param {string} username The username or email.
+ * @param {string} displayName The in game name.
+ *
+ * @returns {Object} The authenticated account object.
  */
-exports.addOfflineAuthAccount = function(username, type = 'offline', accessToken = '0'){
-    // Generate an offline UUID (Version 3 UUID based on username)
-    const uuid = crypto.createHash('md5').update('OfflinePlayer:' + username).digest('hex')
-    
+exports.addElyByAuthAccount = function(uuid, accessToken, username, displayName){
     config.selectedAccount = uuid
     config.authenticationDatabase[uuid] = {
-        type: type,
-        accessToken: accessToken,
+        type: 'elyby',
+        accessToken,
         username: username.trim(),
-        uuid: uuid,
+        uuid: uuid.trim(),
+        displayName: displayName.trim()
+    }
+    return config.authenticationDatabase[uuid]
+}
+
+/**
+ * Adds an offline (cracked) account to the database.
+ *
+ * @param {string} uuid The UUID of the offline account.
+ * @param {string} username The username of the offline account.
+ *
+ * @returns {Object} The authenticated account object.
+ */
+exports.addOfflineAuthAccount = function(uuid, username){
+    config.selectedAccount = uuid
+    config.authenticationDatabase[uuid] = {
+        type: 'offline',
+        accessToken: 'offline_token_bypass',
+        username: username.trim(),
+        uuid: uuid.trim(),
         displayName: username.trim()
     }
     return config.authenticationDatabase[uuid]

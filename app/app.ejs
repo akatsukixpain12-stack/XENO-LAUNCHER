@@ -1,49 +1,262 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-In6B8teKZQll5heMl9bS7CESTbGvuAt3VVV86BUQBDk='"/>
-    <title><%= lang('app.title') %></title>
+    <title>XENO Launcher</title>
     <script src="./assets/js/scripts/uicore.js"></script>
     <script src="./assets/js/scripts/uibinder.js"></script>
     <link type="text/css" rel="stylesheet" href="./assets/css/launcher.css">
-    <style>
-        body {
-            /*background: url('assets/images/backgrounds/<%=bkid%>.jpg') no-repeat center center fixed;*/
-            transition: background-image 1s ease;
-            background-image: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD//gA+Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2ODApLCBkZWZhdWx0IHF1YWxpdHkK/9sAQwAIBgYHBgUIBwcHCQkICgwUDQwLCwwZEhMPFB0aHx4dGhwcICQuJyAiLCMcHCg3KSwwMTQ0NB8nOT04MjwuMzQy/9sAQwEJCQkMCwwYDQ0YMiEcITIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy/8AAEQgAPwBwAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A8VooopDCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/9k=');
-            background-size: cover;
-            -webkit-user-select: none;
-        }
-        #main {
-            display: none;
-            height: calc(100% - 22px);
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%);
-            width: 100%;
-            position: absolute;
-            z-index: 10;
-        }
-        #main[overlay] {
-            filter: blur(3px) contrast(0.9) brightness(1.0);
-        }
-    </style>
 </head>
-<body bkid="<%=bkid%>">
+<body>
     <%- include('frame') %>
-    <div id="main">
-        <%- include('welcome') %>
-        <%- include('login') %>
-        <%- include('waiting') %>
-        <%- include('loginOptions') %>
-        <%- include('settings') %>
-        <%- include('landing') %>
-    </div>
-    <%- include('overlay') %>
-    <div id="loadingContainer">
-        <div id="loadingContent">
-            <div id="loadSpinnerContainer">
-                <img id="loadCenterImage" src="assets/images/LoadingSeal.png">
-                <img id="loadSpinnerImage" class="rotating" src="assets/images/LoadingText.png">
+    <div id="main" style="display: none;">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebarNav">
+            <div id="sidebarLogo">X</div>
+            <button class="sidebar-btn active" data-page="homePage" title="Home">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            </button>
+            <button class="sidebar-btn" data-page="versionsPage" title="Versions">
+                <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+            </button>
+            <button class="sidebar-btn" data-page="settingsPage" title="Settings">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.6 3.6 0 0112 15.6z"/></svg>
+            </button>
+            <div class="sidebar-spacer"></div>
+            <button class="sidebar-btn" id="sidebarLoginBtn" title="Account">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <div id="contentArea">
+            <!-- HOME PAGE -->
+            <div id="homePage" class="viewPage active">
+                <div id="homeHero">
+                    <div id="homeUserBadge" style="display:none;">
+                        <img id="homeUserAvatar" src="https://mc-heads.net/avatar/MHF_Steve/28" alt="">
+                        <span id="homeUserName">Player</span>
+                        <span id="homeUserType">OFFLINE</span>
+                    </div>
+                    <div class="hero-content">
+                        <h1>XENO LAUNCHER</h1>
+                        <p>Play Minecraft with Ely.by auth or offline mode. Every version supported.</p>
+                        <button id="launchBtn" disabled>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
+                            <div>
+                                <div>LAUNCH GAME</div>
+                                <div class="launch-version-label" id="launchVersionLabel">Select a version</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                <div id="launchStatus"></div>
+                <div id="launchProgress">
+                    <div id="launchProgressBar"></div>
+                </div>
+                <div id="newsSection">
+                    <h2>Latest News</h2>
+                    <div class="news-grid" id="newsGrid">
+                        <div class="news-card">
+                            <div class="news-card-img" style="background: linear-gradient(135deg, #1a237e, #311b92);display:flex;align-items:center;justify-content:center;color:#666;font-size:24px;font-weight:800;">XENO</div>
+                            <div class="news-card-body">
+                                <h3>Welcome to XENO Launcher</h3>
+                                <p>Play every version of Minecraft with Ely.by auth support.</p>
+                            </div>
+                        </div>
+                        <div class="news-card">
+                            <div class="news-card-img" style="background: linear-gradient(135deg, #004d40, #00695c);display:flex;align-items:center;justify-content:center;color:#666;font-size:18px;font-weight:700;">Ely.by</div>
+                            <div class="news-card-body">
+                                <h3>Cracked Authentication</h3>
+                                <p>Use Ely.by accounts or play offline without a premium account.</p>
+                            </div>
+                        </div>
+                        <div class="news-card">
+                            <div class="news-card-img" style="background: linear-gradient(135deg, #b71c1c, #880e4f);display:flex;align-items:center;justify-content:center;color:#666;font-size:18px;font-weight:700;">ALL</div>
+                            <div class="news-card-body">
+                                <h3>Every Version</h3>
+                                <p>From classic alpha to the latest release and snapshots.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VERSIONS PAGE -->
+            <div id="versionsPage" class="viewPage">
+                <div class="versions-header">
+                    <h2>Versions</h2>
+                    <div class="version-filter-bar">
+                        <button class="version-filter-btn active" data-filter="release">Release</button>
+                        <button class="version-filter-btn" data-filter="snapshot">Snapshot</button>
+                        <button class="version-filter-btn" data-filter="old_beta">Beta</button>
+                        <button class="version-filter-btn" data-filter="old_alpha">Alpha</button>
+                        <button class="version-filter-btn" data-filter="all">All</button>
+                        <input type="text" class="version-search" id="versionSearch" placeholder="Search versions...">
+                    </div>
+                </div>
+                <div class="versions-grid" id="versionsGrid">
+                    <div style="text-align:center;padding:40px;color:#555;">Loading versions...</div>
+                </div>
+            </div>
+
+            <!-- SETTINGS PAGE -->
+            <div id="settingsPage" class="viewPage">
+                <div class="settings-header">
+                    <h2>Settings</h2>
+                    <button class="close-btn" id="settingsCloseBtn">
+                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
+                </div>
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-panel="gamePanel">Game</button>
+                    <button class="settings-tab" data-panel="accountPanel">Account</button>
+                    <button class="settings-tab" data-panel="aboutPanel">About</button>
+                </div>
+
+                <!-- Game Settings Panel -->
+                <div class="settings-panel active" id="gamePanel">
+                    <div class="settings-section">
+                        <h3>Allocated Memory</h3>
+                        <div class="section-desc">How much memory to allocate to the game instance</div>
+                        <div class="setting-row">
+                            <div class="setting-label">RAM<small id="ramInfo">Loading...</small></div>
+                            <div class="setting-control">
+                                <span class="range-value" id="ramMinLabel">512 MB</span>
+                                <input type="range" class="range-slider" id="ramSlider" min="512" max="16384" step="512" value="3072">
+                                <span class="range-value" id="ramValueLabel">3 GB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Game Resolution</h3>
+                        <div class="section-desc">Set the resolution of the game window</div>
+                        <div class="setting-row">
+                            <div class="setting-label">Resolution</div>
+                            <div class="setting-control">
+                                <div class="res-input-group">
+                                    <span style="color:#888;font-size:12px;font-weight:600;">W</span>
+                                    <input type="number" class="res-input" id="resWidth" value="854" min="640">
+                                    <span class="res-x">X</span>
+                                    <span style="color:#888;font-size:12px;font-weight:600;">H</span>
+                                    <input type="number" class="res-input" id="resHeight" value="480" min="480">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-label">Launch in fullscreen mode</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="fullscreenToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Java Settings</h3>
+                        <div class="section-desc">Configure Java runtime for launching Minecraft</div>
+                        <div class="setting-row">
+                            <div class="setting-label">Auto-detect Java</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoJavaToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Panel -->
+                <div class="settings-panel" id="accountPanel">
+                    <div class="settings-section">
+                        <h3>Accounts</h3>
+                        <div class="section-desc">Manage your game accounts</div>
+                        <div id="accountList"></div>
+                        <button class="login-submit-btn" id="addAccountBtn" style="margin-top:12px;">
+                            + Add Account
+                        </button>
+                    </div>
+                </div>
+
+                <!-- About Panel -->
+                <div class="settings-panel" id="aboutPanel">
+                    <div class="settings-section">
+                        <h3>About XENO Launcher</h3>
+                        <div class="section-desc">
+                            <p style="margin-bottom:8px;">XENO Launcher v1.0.0</p>
+                            <p style="margin-bottom:8px;">A cracked Minecraft launcher with Ely.by authentication support.</p>
+                            <p style="margin-bottom:8px;">Supports all Minecraft versions from Alpha to the latest release.</p>
+                            <p style="color:#555;">Built with Electron. Not affiliated with Mojang or Microsoft.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOGIN PAGE (shown when no accounts) -->
+            <div id="loginPage">
+                <div class="login-container">
+                    <h2>Sign In</h2>
+                    <div class="login-subtitle">Choose your authentication method</div>
+                    <div class="login-tabs">
+                        <button class="login-tab active" data-form="elybyForm">Ely.by</button>
+                        <button class="login-tab" data-form="offlineForm">Offline</button>
+                        <button class="login-tab" data-form="microsoftForm">Microsoft</button>
+                    </div>
+                    <div class="login-error" id="loginError"></div>
+                    <!-- Ely.by Form -->
+                    <div class="login-form active" id="elybyForm">
+                        <div class="form-group">
+                            <label>Email / Username</label>
+                            <input type="text" id="elybyUsername" placeholder="Enter your Ely.by email or username">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="elybyPassword" placeholder="Enter your password">
+                        </div>
+                        <button class="login-submit-btn" id="elybyLoginBtn">Sign In with Ely.by</button>
+                        <div class="login-info">
+                            Don't have an account? <a href="https://ely.by/register" id="elybyRegLink">Register at Ely.by</a>
+                        </div>
+                    </div>
+                    <!-- Offline Form -->
+                    <div class="login-form" id="offlineForm">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="offlineUsername" placeholder="Enter your desired username" maxlength="16">
+                        </div>
+                        <button class="login-submit-btn" id="offlineLoginBtn">Play Offline</button>
+                        <div class="login-info">No account needed. Just pick a username and play!</div>
+                    </div>
+                    <!-- Microsoft Form -->
+                    <div class="login-form" id="microsoftForm">
+                        <button class="login-submit-btn" id="microsoftLoginBtn">Sign In with Microsoft</button>
+                        <div class="login-info">Opens a Microsoft login window. Requires a premium Minecraft account.</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Overlay -->
+    <div id="overlayContainer">
+        <div class="overlay-content">
+            <h2 id="overlayTitle">Notice</h2>
+            <p id="overlayBody">Something happened.</p>
+            <div class="overlay-actions">
+                <button class="overlay-btn overlay-btn-primary" id="overlayConfirmBtn">OK</button>
+                <button class="overlay-btn overlay-btn-secondary" id="overlayDismissBtn" style="display:none;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingContainer">
+        <div id="loadingContent">
+            <div id="loadSpinnerContainer">
+                <div id="loadCenterImage" style="width:48px;height:48px;background:linear-gradient(135deg,#00e676,#00bfa5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#000;">X</div>
+                <div id="loadSpinnerImage" class="rotating" style="position:absolute;top:0;left:0;width:80px;height:80px;border:3px solid transparent;border-top-color:#00e676;border-radius:50%;"></div>
+            </div>
+            <p style="color:#666;font-size:13px;margin-top:16px;">Loading XENO Launcher...</p>
+        </div>
+    </div>
+
+    <script src="./assets/js/scripts/xeno.js"></script>
 </body>
 </html>

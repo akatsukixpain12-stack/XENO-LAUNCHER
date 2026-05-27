@@ -11,11 +11,13 @@
 // Requirements
 const ConfigManager          = require('./configmanager')
 const { LoggerUtil }         = require('helios-core')
+const { ipcRenderer }        = require('electron')
 const { RestResponseStatus } = require('helios-core/common')
 const { MojangRestAPI, MojangErrorCode } = require('helios-core/mojang')
 const { MicrosoftAuth, MicrosoftErrorCode } = require('helios-core/microsoft')
 const { AZURE_CLIENT_ID }    = require('./ipcconstants')
 const Lang = require('./langloader')
+const crypto = require('crypto')
 
 const log = LoggerUtil.getLogger('AuthManager')
 
@@ -418,8 +420,114 @@ exports.validateSelected = async function(){
 
     if(current.type === 'microsoft') {
         return await validateSelectedMicrosoftAccount()
+    } else if(current.type === 'elyby') {
+        return await validateSelectedElyByAccount()
+    } else if(current.type === 'offline') {
+        return true
     } else {
         return await validateSelectedMojangAccount()
     }
-    
+}
+
+// ==================== ELY.BY AUTH ====================
+
+/**
+ * Add an Ely.by account. Authenticates via the Ely.by authserver.
+ *
+ * @param {string} username The Ely.by username or email.
+ * @param {string} password The Ely.by password.
+ * @returns {Promise.<Object>} The authenticated account object.
+ */
+exports.addElyByAccount = async function(username, password) {
+    try {
+        const result = await ipcRenderer.invoke('elyby-login', username, password)
+        if(result.success) {
+            const ret = ConfigManager.addElyByAuthAccount(
+                result.uuid,
+                result.accessToken,
+                username,
+                result.username
+            )
+            ConfigManager.save()
+            return ret
+        } else {
+            return Promise.reject({
+                title: 'Ely.by Auth Error',
+                desc: result.error || 'Failed to authenticate with Ely.by'
+            })
+        }
+    } catch(err) {
+        log.error('Ely.by auth error:', err)
+        return Promise.reject({
+            title: 'Ely.by Auth Error',
+            desc: err.message || 'Unknown error during Ely.by authentication'
+        })
+    }
+}
+
+/**
+ * Validate the selected Ely.by account.
+ *
+ * @returns {Promise.<boolean>}
+ */
+async function validateSelectedElyByAccount() {
+    const current = ConfigManager.getSelectedAccount()
+    try {
+        const result = await ipcRenderer.invoke('elyby-refresh', current.accessToken, ConfigManager.getClientToken())
+        if(result.success) {
+            current.accessToken = result.accessToken
+            ConfigManager.save()
+            return true
+        }
+    } catch(err) {
+        log.error('Ely.by validation error:', err)
+    }
+    return false
+}
+
+/**
+ * Remove an Ely.by account.
+ *
+ * @param {string} uuid The UUID of the account.
+ * @returns {Promise.<void>}
+ */
+exports.removeElyByAccount = async function(uuid) {
+    try {
+        const authAcc = ConfigManager.getAuthAccount(uuid)
+        await ipcRenderer.invoke('elyby-invalidate', authAcc.accessToken, ConfigManager.getClientToken())
+    } catch(err) {
+        log.error('Error invalidating Ely.by token:', err)
+    }
+    ConfigManager.removeAuthAccount(uuid)
+    ConfigManager.save()
+}
+
+// ==================== OFFLINE AUTH ====================
+
+/**
+ * Add an offline (cracked) account.
+ *
+ * @param {string} username The desired username.
+ * @returns {Object} The account object.
+ */
+exports.addOfflineAccount = function(username) {
+    const hash = crypto.createHash('md5').update(`OfflinePlayer:${username}`, 'utf8').digest()
+    hash[6] = (hash[6] & 0x0f) | 0x30
+    hash[8] = (hash[8] & 0x3f) | 0x80
+    const hex = hash.toString('hex')
+    const uuid = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`
+
+    const ret = ConfigManager.addOfflineAuthAccount(uuid, username)
+    ConfigManager.save()
+    return ret
+}
+
+/**
+ * Remove an offline account.
+ *
+ * @param {string} uuid The UUID of the account.
+ */
+exports.removeOfflineAccount = function(uuid) {
+    ConfigManager.removeAuthAccount(uuid)
+    ConfigManager.save()
 }

@@ -1,8 +1,8 @@
-appId: 'helioslauncher'
-productName: 'Helios Launcher'
+appId: 'xenolauncher'
+productName: 'XENO Launcher'
 artifactName: '${productName}-setup-${version}.${ext}'
 
-copyright: 'Copyright © 2018-2026 Daniel Scalzi'
+copyright: 'Copyright © 2025 XENO Team'
 
 asar: true
 compression: 'maximum'
@@ -39,10 +39,10 @@ mac:
 # Linux Configuration
 linux: 
   target: 'AppImage'
-  maintainer: 'Daniel Scalzi'
-  vendor: 'Daniel Scalzi'
-  synopsis: 'Modded Minecraft Launcher'
-  description: 'Custom launcher which allows users to join modded servers. All mods, configurations, and updates are handled automatically.'
+  maintainer: 'XENO Team'
+  vendor: 'XENO Team'
+  synopsis: 'Cracked Minecraft Launcher'
+  description: 'Minecraft launcher with Ely.by auth support. Play every version of Minecraft.'
   category: 'Game'
 
 
