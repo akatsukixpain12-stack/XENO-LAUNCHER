@@ -343,6 +343,9 @@ function checkExistingAuth() {
         if (selectedVersion) {
             document.getElementById('launchBtn').disabled = false
         }
+    } else {
+        // No accounts — auto-show login page on first launch
+        showLoginPage()
     }
     renderAccountList()
 }
