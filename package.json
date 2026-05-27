@@ -1,13 +1,13 @@
 {
   "name": "xenolauncher",
-  "version": "1.0.0",
-  "productName": "XENO Launcher",
-  "description": "Cracked Minecraft Launcher with Ely.by Auth",
-  "author": "XENO Team",
+  "version": "2.2.1",
+  "productName": "Xeno Launcher",
+  "description": "High Performance Minecraft Launcher",
+  "author": "Xeno Team",
   "license": "UNLICENSED",
-  "homepage": "https://github.com/akatsukixpain12-stack/XENO-LAUNCHER",
+  "homepage": "https://github.com/dscalzi/HeliosLauncher",
   "bugs": {
-    "url": "https://github.com/akatsukixpain12-stack/XENO-LAUNCHER/issues"
+    "url": "https://github.com/dscalzi/HeliosLauncher/issues"
   },
   "private": true,
   "main": "index.js",
@@ -47,6 +47,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akatsukixpain12-stack/XENO-LAUNCHER.git"
+    "url": "git+https://github.com/dscalzi/HeliosLauncher.git"
   }
 }
