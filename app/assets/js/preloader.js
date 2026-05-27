@@ -42,7 +42,8 @@ function onDistroLoad(data){
         // Resolve the selected server if its value has yet to be set.
         if(ConfigManager.getSelectedServer() == null || data.getServerById(ConfigManager.getSelectedServer()) == null){
             logger.info('Determining default selected server..')
-            ConfigManager.setSelectedServer(data.getMainServer().rawServer.id)
+            const mainServer = data.getMainServer()
+            ConfigManager.setSelectedServer(mainServer ? mainServer.rawServer.id : data.servers[0].rawServer.id)
             ConfigManager.save()
         }
     }

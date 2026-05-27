@@ -2,6 +2,7 @@ name: Build
 
 on:
   push:
+    branches: [ master, main ]
     tags:
       - 'v*' # Trigger this workflow only when a tag like v1.0.0 is pushed
 
