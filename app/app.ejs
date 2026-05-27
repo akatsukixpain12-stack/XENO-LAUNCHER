@@ -41,7 +41,6 @@
                         <h1>XENO LAUNCHER</h1>
                         <p>Play Minecraft with Ely.by auth or offline mode. Every version supported.</p>
                         <button id="launchBtn" disabled>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
                             <div>
                                 <div>LAUNCH GAME</div>
                                 <div class="launch-version-label" id="launchVersionLabel">Select a version</div>
@@ -83,107 +82,128 @@
 
             <!-- VERSIONS PAGE -->
             <div id="versionsPage" class="viewPage">
-                <div class="versions-header">
-                    <h2>Versions</h2>
-                    <div class="version-filter-bar">
-                        <button class="version-filter-btn active" data-filter="release">Release</button>
-                        <button class="version-filter-btn" data-filter="snapshot">Snapshot</button>
-                        <button class="version-filter-btn" data-filter="old_beta">Beta</button>
-                        <button class="version-filter-btn" data-filter="old_alpha">Alpha</button>
-                        <button class="version-filter-btn" data-filter="all">All</button>
-                        <input type="text" class="version-search" id="versionSearch" placeholder="Search versions...">
+                <div class="versions-main">
+                    <div class="versions-header">
+                        <h2>Versions</h2>
+                        <div class="version-filter-bar">
+                            <button class="version-filter-btn active" data-filter="release">Release</button>
+                            <button class="version-filter-btn" data-filter="snapshot">Snapshot</button>
+                            <button class="version-filter-btn" data-filter="old_beta">Beta</button>
+                            <button class="version-filter-btn" data-filter="old_alpha">Alpha</button>
+                            <button class="version-filter-btn" data-filter="all">All</button>
+                            <input type="text" class="version-search" id="versionSearch" placeholder="Search...">
+                        </div>
+                    </div>
+                    <div class="versions-grid" id="versionsGrid">
+                        <div style="text-align:center;padding:40px;color:#555;">Loading versions...</div>
                     </div>
                 </div>
-                <div class="versions-grid" id="versionsGrid">
-                    <div style="text-align:center;padding:40px;color:#555;">Loading versions...</div>
+                <div id="versionDetailPanel">
+                    <h3>Selected Version</h3>
+                    <div class="detail-preview" id="detailPreview">MC</div>
+                    <div class="detail-title" id="detailTitle">No version selected</div>
+                    <div class="detail-meta" id="detailMeta">Select a version from the grid to see details here.</div>
+                    <button class="detail-launch-btn" id="detailLaunchBtn">LAUNCH GAME</button>
                 </div>
             </div>
 
             <!-- SETTINGS PAGE -->
             <div id="settingsPage" class="viewPage">
-                <div class="settings-header">
-                    <h2>Settings</h2>
-                    <button class="close-btn" id="settingsCloseBtn">
-                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                <div class="settings-sidebar">
+                    <div class="settings-sidebar-title">Settings</div>
+                    <button class="settings-nav-item active" data-panel="gamePanel">
+                        <svg viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                        Game
+                    </button>
+                    <button class="settings-nav-item" data-panel="accountPanel">
+                        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        Account
+                    </button>
+                    <button class="settings-nav-item" data-panel="aboutPanel">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        About
                     </button>
                 </div>
-                <div class="settings-tabs">
-                    <button class="settings-tab active" data-panel="gamePanel">Game</button>
-                    <button class="settings-tab" data-panel="accountPanel">Account</button>
-                    <button class="settings-tab" data-panel="aboutPanel">About</button>
-                </div>
-
-                <!-- Game Settings Panel -->
-                <div class="settings-panel active" id="gamePanel">
-                    <div class="settings-section">
-                        <h3>Allocated Memory</h3>
-                        <div class="section-desc">How much memory to allocate to the game instance</div>
-                        <div class="setting-row">
-                            <div class="setting-label">RAM<small id="ramInfo">Loading...</small></div>
-                            <div class="setting-control">
-                                <span class="range-value" id="ramMinLabel">512 MB</span>
-                                <input type="range" class="range-slider" id="ramSlider" min="512" max="16384" step="512" value="3072">
-                                <span class="range-value" id="ramValueLabel">3 GB</span>
-                            </div>
-                        </div>
+                <div class="settings-main">
+                    <div class="settings-main-header">
+                        <h2 id="settingsMainTitle">Game Settings</h2>
+                        <button class="close-btn" id="settingsCloseBtn">
+                            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                        </button>
                     </div>
-                    <div class="settings-section">
-                        <h3>Game Resolution</h3>
-                        <div class="section-desc">Set the resolution of the game window</div>
-                        <div class="setting-row">
-                            <div class="setting-label">Resolution</div>
-                            <div class="setting-control">
-                                <div class="res-input-group">
-                                    <span style="color:#888;font-size:12px;font-weight:600;">W</span>
-                                    <input type="number" class="res-input" id="resWidth" value="854" min="640">
-                                    <span class="res-x">X</span>
-                                    <span style="color:#888;font-size:12px;font-weight:600;">H</span>
-                                    <input type="number" class="res-input" id="resHeight" value="480" min="480">
+
+                    <!-- Game Settings Panel -->
+                    <div class="settings-panel active" id="gamePanel">
+                        <div class="settings-section">
+                            <h3>Allocated Memory</h3>
+                            <div class="section-desc">How much memory should we allocate to the game instance</div>
+                            <div class="setting-row">
+                                <div class="setting-label">RAM<small id="ramInfo">Loading...</small></div>
+                                <div class="setting-control">
+                                    <span class="range-value" id="ramMinLabel">500 MB</span>
+                                    <input type="range" class="range-slider" id="ramSlider" min="512" max="16384" step="512" value="3072">
+                                    <span class="range-value" id="ramValueLabel">3 GB</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="setting-row">
-                            <div class="setting-label">Launch in fullscreen mode</div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="fullscreenToggle">
-                                <span class="toggle-slider"></span>
-                            </label>
+                        <div class="settings-section">
+                            <h3>Game Resolution</h3>
+                            <div class="section-desc">Set the resolution of the game instance</div>
+                            <div class="setting-row">
+                                <div class="setting-label">Resolution</div>
+                                <div class="setting-control">
+                                    <div class="res-input-group">
+                                        <span style="color:#888;font-size:12px;font-weight:600;">W</span>
+                                        <input type="number" class="res-input" id="resWidth" value="854" min="640">
+                                        <span class="res-x">X</span>
+                                        <span style="color:#888;font-size:12px;font-weight:600;">H</span>
+                                        <input type="number" class="res-input" id="resHeight" value="480" min="480">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="setting-row">
+                                <div class="setting-label">Launch in fullscreen mode</div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="fullscreenToggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <h3>Java Settings</h3>
+                            <div class="section-desc">Configure Java runtime for launching Minecraft</div>
+                            <div class="setting-row">
+                                <div class="setting-label">Auto-detect Java</div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoJavaToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
                         </div>
                     </div>
-                    <div class="settings-section">
-                        <h3>Java Settings</h3>
-                        <div class="section-desc">Configure Java runtime for launching Minecraft</div>
-                        <div class="setting-row">
-                            <div class="setting-label">Auto-detect Java</div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="autoJavaToggle" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
+
+                    <!-- Account Panel -->
+                    <div class="settings-panel" id="accountPanel">
+                        <div class="settings-section">
+                            <h3>Accounts</h3>
+                            <div class="section-desc">Manage your game accounts</div>
+                            <div id="accountList"></div>
+                            <button class="login-submit-btn" id="addAccountBtn" style="margin-top:12px;">
+                                + Add Account
+                            </button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Account Panel -->
-                <div class="settings-panel" id="accountPanel">
-                    <div class="settings-section">
-                        <h3>Accounts</h3>
-                        <div class="section-desc">Manage your game accounts</div>
-                        <div id="accountList"></div>
-                        <button class="login-submit-btn" id="addAccountBtn" style="margin-top:12px;">
-                            + Add Account
-                        </button>
-                    </div>
-                </div>
-
-                <!-- About Panel -->
-                <div class="settings-panel" id="aboutPanel">
-                    <div class="settings-section">
-                        <h3>About XENO Launcher</h3>
-                        <div class="section-desc">
-                            <p style="margin-bottom:8px;">XENO Launcher v1.0.0</p>
-                            <p style="margin-bottom:8px;">A cracked Minecraft launcher with Ely.by authentication support.</p>
-                            <p style="margin-bottom:8px;">Supports all Minecraft versions from Alpha to the latest release.</p>
-                            <p style="color:#555;">Built with Electron. Not affiliated with Mojang or Microsoft.</p>
+                    <!-- About Panel -->
+                    <div class="settings-panel" id="aboutPanel">
+                        <div class="settings-section">
+                            <h3>About XENO Launcher</h3>
+                            <div class="section-desc">
+                                <p style="margin-bottom:8px;">XENO Launcher v1.0.0</p>
+                                <p style="margin-bottom:8px;">A cracked Minecraft launcher with Ely.by authentication support.</p>
+                                <p style="margin-bottom:8px;">Supports all Minecraft versions from Alpha to the latest release.</p>
+                                <p style="color:#555;">Built with Electron. Not affiliated with Mojang or Microsoft.</p>
+                            </div>
                         </div>
                     </div>
                 </div>

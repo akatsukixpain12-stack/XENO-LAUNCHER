@@ -96,16 +96,24 @@ function initLoginTabs() {
 // ==================== SETTINGS TABS ====================
 
 function initSettingsTabs() {
-    const tabs = document.querySelectorAll('.settings-tab')
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'))
-            tab.classList.add('active')
+    const navItems = document.querySelectorAll('.settings-nav-item')
+    const titleMap = { gamePanel: 'Game Settings', accountPanel: 'Account Settings', aboutPanel: 'About' }
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(n => n.classList.remove('active'))
+            item.classList.add('active')
             document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'))
-            const panelId = tab.dataset.panel
+            const panelId = item.dataset.panel
             document.getElementById(panelId).classList.add('active')
+            const titleEl = document.getElementById('settingsMainTitle')
+            if (titleEl) titleEl.textContent = titleMap[panelId] || 'Settings'
         })
     })
+
+    const detailLaunchBtn = document.getElementById('detailLaunchBtn')
+    if (detailLaunchBtn) {
+        detailLaunchBtn.addEventListener('click', handleLaunch)
+    }
 }
 
 // ==================== VERSION FILTERS ====================
@@ -171,16 +179,22 @@ function renderVersions() {
         return
     }
 
+    const colorMap = {
+        release: ['#1a237e','#283593'],
+        snapshot: ['#e65100','#bf360c'],
+        old_beta: ['#4a148c','#6a1b9a'],
+        old_alpha: ['#b71c1c','#c62828']
+    }
     grid.innerHTML = displayVersions.map(v => {
         const isSelected = selectedVersion && selectedVersion.id === v.id
         const badgeClass = `badge-${v.type}`
-        const releaseDate = v.releaseTime ? new Date(v.releaseTime).toLocaleDateString() : ''
+        const colors = colorMap[v.type] || ['#16163a','#1f1f35']
         return `
-            <div class="version-card ${isSelected ? 'selected' : ''}" data-version-id="${v.id}" data-version-type="${v.type}" data-version-url="${v.url}">
-                <div class="version-card-icon">${v.id}</div>
-                <h3>Minecraft ${v.id}</h3>
-                <span class="version-type-badge ${badgeClass}">${v.type}</span>
-                <div style="font-size:11px;color:#555;margin-top:6px;">${releaseDate}</div>
+            <div class="version-card ${isSelected ? 'selected' : ''}" data-version-id="${v.id}" data-version-type="${v.type}" data-version-url="${v.url}" data-version-time="${v.releaseTime || ''}">
+                <div class="version-card-img" style="background:linear-gradient(135deg,${colors[0]},${colors[1]});">
+                    <div class="version-card-badge"><span class="version-type-badge ${badgeClass}">${v.type}</span></div>
+                    <div class="version-card-name">${v.id}</div>
+                </div>
             </div>
         `
     }).join('')
@@ -191,7 +205,8 @@ function renderVersions() {
             const vId = card.dataset.versionId
             const vType = card.dataset.versionType
             const vUrl = card.dataset.versionUrl
-            selectVersion({ id: vId, type: vType, url: vUrl })
+            const vTime = card.dataset.versionTime
+            selectVersion({ id: vId, type: vType, url: vUrl, releaseTime: vTime })
         })
     })
 }
@@ -208,6 +223,18 @@ function selectVersion(version) {
     const launchBtn = document.getElementById('launchBtn')
     const launchLabel = document.getElementById('launchVersionLabel')
     if (launchLabel) launchLabel.textContent = `Minecraft ${version.id}`
+
+    // Update detail panel
+    const detailTitle = document.getElementById('detailTitle')
+    const detailMeta = document.getElementById('detailMeta')
+    const detailPreview = document.getElementById('detailPreview')
+    if (detailTitle) detailTitle.textContent = `Minecraft ${version.id}`
+    if (detailMeta) {
+        const typeLabels = { release: 'Release', snapshot: 'Snapshot', old_beta: 'Beta', old_alpha: 'Alpha' }
+        const releaseDate = version.releaseTime ? new Date(version.releaseTime).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''
+        detailMeta.innerHTML = `<strong>Type:</strong> ${typeLabels[version.type] || version.type}<br><strong>Released:</strong> ${releaseDate || 'Unknown'}`
+    }
+    if (detailPreview) detailPreview.textContent = version.id
 
     // Enable launch if logged in
     const account = getSelectedAccount()
