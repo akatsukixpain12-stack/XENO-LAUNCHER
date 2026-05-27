@@ -373,28 +373,6 @@ exports.addOfflineAuthAccount = function(username, type = 'offline', accessToken
 }
 
 /**
- * Adds an offline (cracked) or alternative auth account.
- * 
- * @param {string} username The desired display name.
- * @param {string} type The account type ('offline' or 'ely')
- * @param {string} accessToken Optional token for alternative services.
- */
-exports.addOfflineAuthAccount = function(username, type = 'offline', accessToken = '0'){
-    // Generate an offline UUID (Version 3 UUID based on username)
-    const uuid = crypto.createHash('md5').update('OfflinePlayer:' + username).digest('hex')
-    
-    config.selectedAccount = uuid
-    config.authenticationDatabase[uuid] = {
-        type: type,
-        accessToken: accessToken,
-        username: username.trim(),
-        uuid: uuid,
-        displayName: username.trim()
-    }
-    return config.authenticationDatabase[uuid]
-}
-
-/**
  * Update the tokens of an authenticated microsoft account.
  * 
  * @param {string} uuid The uuid of the authenticated account.
@@ -583,16 +561,18 @@ function defaultJavaConfig17(ram) {
         minRAM: resolveSelectedRAM(ram),
         maxRAM: resolveSelectedRAM(ram),
         executable: null,
-        // Added common JVM arguments for potential FPS boost
+        // Massive FPS Optimization for Java 17+
         jvmOptions: [
             '-XX:+UnlockExperimentalVMOptions',
             '-XX:+UseG1GC',
-            '-XX:G1NewSizePercent=20',
-            '-XX:+ParallelRefProcEnabled',
-            '-XX:+AlwaysPreTouch',
+            '-XX:G1NewSizePercent=30',
+            '-XX:G1MaxNewSizePercent=40',
+            '-XX:G1HeapRegionSize=32M',
             '-XX:G1ReservePercent=20',
             '-XX:MaxGCPauseMillis=50',
-            '-XX:G1HeapRegionSize=32M'
+            '-XX:+ParallelRefProcEnabled',
+            '-XX:+AlwaysPreTouch',
+            '-XX:+DisableExplicitGC'
         ],
     }
 }
