@@ -177,14 +177,20 @@ const AUTH_MODE = { FULL: 0, MS_REFRESH: 1, MC_REFRESH: 2 }
  */
 exports.addElyByAccount = async function(username, password) {
     try {
-        // Ely.by uses a Yggdrasil compatible API
-        // Custom implementation would point MojangRestAPI to https://authserver.ely.by
         log.info('Attempting Ely.by authentication...')
-        // Placeholder for Ely.by logic
-        const ret = ConfigManager.addMojangAuthAccount('elyby-uuid', 'elyby-token', username, username)
-        config.authenticationDatabase['elyby-uuid'].type = 'elyby'
-        ConfigManager.save()
-        return ret
+        
+        // Using the Mojang API structure but targeting Ely.by's Yggdrasil endpoint
+        const response = await MojangRestAPI.authenticate(username, password, ConfigManager.getClientToken(), 'https://authserver.ely.by')
+        
+        if(response.responseStatus === RestResponseStatus.SUCCESS) {
+            const session = response.data
+            const ret = ConfigManager.addMojangAuthAccount(session.selectedProfile.id, session.accessToken, username, session.selectedProfile.name)
+            ConfigManager.getAuthAccount(session.selectedProfile.id).type = 'elyby'
+            ConfigManager.save()
+            return ret
+        } else {
+            return Promise.reject(mojangErrorDisplayable(response.mojangErrorCode))
+        }
     } catch (err) {
         log.error('Ely.by Auth Failed', err)
         return Promise.reject(err)

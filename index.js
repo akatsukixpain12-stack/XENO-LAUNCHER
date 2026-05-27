@@ -125,12 +125,12 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGIN, (ipcEvent, ...arguments_) => {
     msftAuthViewSuccess = arguments_[0]
     msftAuthViewOnClose = arguments_[1]
     msftAuthWindow = new BrowserWindow({
-        title: 'Xeno Launcher - Microsoft Login',
+        title: 'ZENO LAUNCHER - Microsoft Login',
         backgroundColor: '#222222',
         width: 520,
         height: 600,
         frame: true,
-        icon: getPlatformIcon('SealCircle')
+        icon: null
     })
 
     msftAuthWindow.on('closed', () => {
@@ -176,12 +176,12 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGOUT, (ipcEvent, uuid, isLastAccount) => {
     msftLogoutSuccess = false
     msftLogoutSuccessSent = false
     msftLogoutWindow = new BrowserWindow({
-        title: LangLoader.queryJS('index.microsoftLogoutTitle'),
+        title: 'ZENO LAUNCHER - Logout',
         backgroundColor: '#222222',
         width: 520,
         height: 600,
         frame: true,
-        icon: getPlatformIcon('SealCircle')
+        icon: null
     })
 
     msftLogoutWindow.on('closed', () => {
@@ -227,7 +227,7 @@ function createWindow() {
     win = new BrowserWindow({
         width: 980,
         height: 552,
-        icon: getPlatformIcon('SealCircle'),
+        icon: null,
         frame: false,
         webPreferences: {
             preload: path.join(__dirname, 'app', 'assets', 'js', 'preloader.js'),
@@ -240,8 +240,7 @@ function createWindow() {
 
     const data = {
         bkid: Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)),
-        lang: (str, placeHolders) => LangLoader.queryEJS(str, placeHolders),
-        logoPath: pathToFileURL('C:/Users/HP/logo.png').toString()
+        lang: (str, placeHolders) => LangLoader.queryEJS(str, placeHolders)
     }
     Object.entries(data).forEach(([key, val]) => ejse.data(key, val))
 

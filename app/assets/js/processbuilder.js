@@ -530,7 +530,7 @@ class ProcessBuilder {
                             val = args[i].replace(argDiscovery, tempNativePath)
                             break
                         case 'launcher_name':
-                            val = args[i].replace(argDiscovery, 'Xeno Launcher Pro')
+                            val = args[i].replace(argDiscovery, 'ZENO LAUNCHER')
                             break
                         case 'launcher_version':
                             val = args[i].replace(argDiscovery, this.launcherVersion)

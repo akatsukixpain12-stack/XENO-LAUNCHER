@@ -361,7 +361,7 @@ exports.addOfflineAuthAccount = function(username){
     config.selectedAccount = uuid
     config.authenticationDatabase[uuid] = {
         type: 'offline',
-        accessToken: '0', // Global offline bypass token
+        accessToken: '0',
         username: username.trim(),
         uuid: uuid,
         displayName: username.trim()
@@ -557,15 +557,18 @@ function defaultJavaConfig8(ram) {
         minRAM: resolveSelectedRAM(ram),
         maxRAM: resolveSelectedRAM(ram),
         executable: null,
-        // Added common JVM arguments for potential FPS boost
+        // Optimized JVM arguments for Java 8 FPS Boost
         jvmOptions: [
-            '-XX:+UseConcMarkSweepGC',
-            '-XX:+CMSIncrementalMode',
-            '-XX:-UseAdaptiveSizePolicy',
+            '-Xmx' + resolveSelectedRAM(ram),
+            '-Xms' + resolveSelectedRAM(ram),
+            '-XX:+UseG1GC',
             '-XX:+ParallelRefProcEnabled',
-            '-XX:+AlwaysPreTouch',
             '-XX:MaxGCPauseMillis=200',
-            '-Xmn128M'
+            '-XX:+UnlockExperimentalVMOptions',
+            '-XX:+DisableExplicitGC',
+            '-XX:+AlwaysPreTouch',
+            '-Dsun.rmi.dgc.server.gcInterval=3600000',
+            '-Dsun.rmi.dgc.client.gcInterval=3600000'
         ],
     }
 }
@@ -575,18 +578,19 @@ function defaultJavaConfig17(ram) {
         minRAM: resolveSelectedRAM(ram),
         maxRAM: resolveSelectedRAM(ram),
         executable: null,
-        // Massive FPS Optimization for Java 17+
+        // High-Performance flags for Java 17+ (Lunar/Feather style)
         jvmOptions: [
             '-XX:+UnlockExperimentalVMOptions',
             '-XX:+UseG1GC',
-            '-XX:G1NewSizePercent=30',
-            '-XX:G1MaxNewSizePercent=40',
+            '-XX:G1NewSizePercent=20',
+            '-XX:G1MaxNewSizePercent=30',
             '-XX:G1HeapRegionSize=32M',
             '-XX:G1ReservePercent=20',
             '-XX:MaxGCPauseMillis=50',
             '-XX:+ParallelRefProcEnabled',
             '-XX:+AlwaysPreTouch',
-            '-XX:+DisableExplicitGC'
+            '-XX:+DisableExplicitGC',
+            '-XX:+UseStringDeduplication'
         ],
     }
 }

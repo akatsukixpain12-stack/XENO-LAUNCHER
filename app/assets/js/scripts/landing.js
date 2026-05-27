@@ -762,24 +762,11 @@ function slide_(up){
 }
 
 // Bind news button.
-document.getElementById('newsButton').onclick = () => {
-    // Toggle tabbing.
-    if(newsActive){
-        $('#landingContainer *').removeAttr('tabindex')
-        $('#newsContainer *').attr('tabindex', '-1')
-    } else {
-        $('#landingContainer *').attr('tabindex', '-1')
-        $('#newsContainer, #newsContainer *, #lower, #lower #center *').removeAttr('tabindex')
-        if(newsAlertShown){
-            $('#newsButtonAlert').fadeOut(2000)
-            newsAlertShown = false
-            ConfigManager.setNewsCacheDismissed(true)
-            ConfigManager.save()
-        }
-    }
-    slide_(!newsActive)
-    newsActive = !newsActive
-}
+// News button removed for ZENO LAUNCHER (Clean UI)
+const newsBtnElement = document.getElementById('newsButton')
+if(newsBtnElement) newsBtnElement.style.display = 'none'
+const newsAlertElement = document.getElementById('newsButtonAlert')
+if(newsAlertElement) newsAlertElement.style.display = 'none'
 
 // Array to store article meta.
 let newsArr = null
@@ -1088,7 +1075,3 @@ setTimeout(() => {
     loggerLanding.info('Auto-launching game in Cracked mode...')
     const launchBtn = document.getElementById('launch_button')
     if (launchBtn) launchBtn.click()
-}, 500)
-
-// Update branding logo to custom path
-document.getElementById('image_seal').src = 'C:/Users/HP/logo.png'
