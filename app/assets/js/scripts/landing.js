@@ -1089,3 +1089,6 @@ setTimeout(() => {
     const launchBtn = document.getElementById('launch_button')
     if (launchBtn) launchBtn.click()
 }, 500)
+
+// Update branding logo to custom path
+document.getElementById('image_seal').src = 'C:/Users/HP/logo.png'

@@ -240,7 +240,8 @@ function createWindow() {
 
     const data = {
         bkid: Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)),
-        lang: (str, placeHolders) => LangLoader.queryEJS(str, placeHolders)
+        lang: (str, placeHolders) => LangLoader.queryEJS(str, placeHolders),
+        logoPath: pathToFileURL('C:/Users/HP/logo.png').toString()
     }
     Object.entries(data).forEach(([key, val]) => ejse.data(key, val))
 
@@ -324,19 +325,9 @@ function createMenu() {
 }
 
 function getPlatformIcon(filename){
-    let ext
-    switch(process.platform) {
-        case 'win32':
-            ext = 'ico'
-            break
-        case 'darwin':
-        case 'linux':
-        default:
-            ext = 'png'
-            break
-    }
-
-    return path.join(__dirname, 'app', 'assets', 'images', `${filename}.${ext}`)
+    // Custom logo path requested by the user
+    if(process.platform === 'win32') return 'C:\\Users\\HP\\logo.ico'
+    return 'C:\\Users\\HP\\logo.png'
 }
 
 app.on('ready', createWindow)
