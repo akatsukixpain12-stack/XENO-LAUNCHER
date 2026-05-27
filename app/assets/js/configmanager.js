@@ -8,7 +8,7 @@ const logger = LoggerUtil.getLogger('ConfigManager')
 
 const sysRoot = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
 
-const dataPath = path.join(sysRoot, '.helioslauncher')
+const dataPath = path.join(sysRoot, '.xenolauncher')
 
 const launcherDir = require('@electron/remote').app.getPath('userData')
 
@@ -346,28 +346,6 @@ exports.addMojangAuthAccount = function(uuid, accessToken, username, displayName
         username: username.trim(),
         uuid: uuid.trim(),
         displayName: displayName.trim()
-    }
-    return config.authenticationDatabase[uuid]
-}
-
-/**
- * Adds an offline (cracked) or alternative auth account.
- * 
- * @param {string} username The desired display name.
- * @param {string} type The account type ('offline' or 'ely')
- * @param {string} accessToken Optional token for alternative services.
- */
-exports.addOfflineAuthAccount = function(username, type = 'offline', accessToken = '0'){
-    // Generate an offline UUID (Version 3 UUID based on username)
-    const uuid = crypto.createHash('md5').update('OfflinePlayer:' + username).digest('hex')
-    
-    config.selectedAccount = uuid
-    config.authenticationDatabase[uuid] = {
-        type: type,
-        accessToken: accessToken,
-        username: username.trim(),
-        uuid: uuid,
-        displayName: username.trim()
     }
     return config.authenticationDatabase[uuid]
 }

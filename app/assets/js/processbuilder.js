@@ -74,7 +74,7 @@ class ProcessBuilder {
         // Hide access token
         const loggableArgs = [...args]
         const tokenIndex = loggableArgs.findIndex(x => x === this.authUser.accessToken)
-        if (tokenIndex > -1 && this.authUser.accessToken !== '0') {
+        if (tokenIndex > -1) {
             loggableArgs[tokenIndex] = '**********'
         }
 
@@ -375,7 +375,7 @@ class ProcessBuilder {
 
         // Java Arguments
         if(process.platform === 'darwin'){
-            args.push('-Xdock:name=HeliosLauncher')
+            args.push('-Xdock:name=XenoLauncher')
             args.push('-Xdock:icon=' + path.join(__dirname, '..', 'images', 'minecraft.icns'))
         }
         args.push('-Xmx' + ConfigManager.getMaxRAM(this.server.rawServer.id))
@@ -513,9 +513,7 @@ class ProcessBuilder {
                             val = this.authUser.accessToken
                             break
                         case 'user_type':
-                            if (this.authUser.type === 'microsoft') val = 'msa'
-                            else if (this.authUser.type === 'mojang') val = 'mojang'
-                            else val = 'legacy'
+                            val = this.authUser.type === 'microsoft' ? 'msa' : 'mojang'
                             break
                         case 'version_type':
                             val = this.vanillaManifest.type
@@ -530,7 +528,7 @@ class ProcessBuilder {
                             val = args[i].replace(argDiscovery, tempNativePath)
                             break
                         case 'launcher_name':
-                            val = args[i].replace(argDiscovery, 'Helios-Launcher')
+                            val = args[i].replace(argDiscovery, 'Xeno-Launcher')
                             break
                         case 'launcher_version':
                             val = args[i].replace(argDiscovery, this.launcherVersion)
@@ -599,9 +597,7 @@ class ProcessBuilder {
                         val = this.authUser.accessToken
                         break
                     case 'user_type':
-                        if (this.authUser.type === 'microsoft') val = 'msa'
-                        else if (this.authUser.type === 'mojang') val = 'mojang'
-                        else val = 'legacy'
+                        val = this.authUser.type === 'microsoft' ? 'msa' : 'mojang'
                         break
                     case 'user_properties': // 1.8.9 and below.
                         val = '{}'

@@ -1,9 +1,9 @@
 {
-  "name": "helioslauncher",
+  "name": "xenolauncher",
   "version": "2.2.1",
-  "productName": "Helios Launcher",
-  "description": "Modded Minecraft Launcher",
-  "author": "Daniel Scalzi (https://github.com/dscalzi/)",
+  "productName": "Xeno Launcher",
+  "description": "High Performance Minecraft Launcher",
+  "author": "Xeno Team",
   "license": "UNLICENSED",
   "homepage": "https://github.com/dscalzi/HeliosLauncher",
   "bugs": {
