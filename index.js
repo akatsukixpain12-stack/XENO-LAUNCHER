@@ -324,9 +324,8 @@ function createMenu() {
 }
 
 function getPlatformIcon(filename){
-    // Custom logo path requested by the user
-    if(process.platform === 'win32') return 'C:\\Users\\HP\\logo.ico'
-    return 'C:\\Users\\HP\\logo.png'
+    // Portably resolve the icon from the assets folder
+    return path.join(__dirname, 'app', 'assets', 'images', 'logo.' + (process.platform === 'win32' ? 'ico' : 'png'))
 }
 
 app.on('ready', createWindow)

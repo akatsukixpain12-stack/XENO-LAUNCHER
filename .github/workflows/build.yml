@@ -1,9 +1,12 @@
 name: Build
 
-on: push
+on:
+  push:
+    tags:
+      - 'v*' # Trigger this workflow only when a tag like v1.0.0 is pushed
 
 jobs:
-  release:
+  build-all-platforms: # Renamed for clarity, this job builds the installers
     runs-on: ${{ matrix.os }}
 
     permissions:
@@ -36,3 +39,36 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run dist
         shell: bash
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-build # Name the artifact based on the OS
+          path: dist/ # The directory where electron-builder puts the installers
+          retention-days: 5 # Keep artifacts for 5 days
+
+  create-github-release: # This new job creates the GitHub Release
+    needs: build-all-platforms # Ensure all platform builds are complete before creating the release
+    runs-on: ubuntu-latest # Run this job on a single OS to collect and upload all assets
+    permissions:
+      contents: write # Required to create and upload assets to a GitHub Release
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts # Download all artifacts into this directory
+
+      - name: Create GitHub Release and Upload Assets
+        uses: softprops/action-gh-release@v2 # Action to create a release and upload files
+        if: startsWith(github.ref, 'refs/tags/') # Only create a release if the push was a tag
+        with:
+          files: | # Specify the paths to the installer files within the downloaded artifacts
+            artifacts/windows-latest-build/*.exe
+            artifacts/macos-latest-build/*.dmg
+            artifacts/ubuntu-latest-build/*.AppImage
+            artifacts/ubuntu-latest-build/*.deb
+          # The tag name (e.g., v1.0.0) will automatically be used as the release name.
+          # You can customize the release name and body if needed:
+          # name: Release ${{ github.ref_name }}
+          # body: Automated release for tag ${{ github.ref_name }}
