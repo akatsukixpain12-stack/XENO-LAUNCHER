@@ -9,8 +9,8 @@ const fs                                = require('fs')
 const isDev                             = require('./app/assets/js/isdev')
 const path                              = require('path')
 const semver                            = require('semver')
-const { pathToFileURL }                 = require('url')
-const { AZURE_CLIENT_ID, MSFT_OPCODE, MSFT_REPLY_TYPE, MSFT_ERROR, SHELL_OPCODE } = require('./app/assets/js/ipcconstants')
+const { pathToFileURL, URL }            = require('url')
+const { AZURE_CLIENT_ID, GOOGLE_CLIENT_ID, MSFT_OPCODE, GGL_OPCODE, MSFT_REPLY_TYPE, MSFT_ERROR, SHELL_OPCODE, MARKET_OPCODE } = require('./app/assets/js/ipcconstants')
 const LangLoader                        = require('./app/assets/js/langloader')
 
 // Setup Lang
@@ -110,6 +110,7 @@ app.disableHardwareAcceleration()
 
 
 const REDIRECT_URI_PREFIX = 'https://login.microsoftonline.com/common/oauth2/nativeclient?'
+const GOOGLE_REDIRECT_URI = 'http://localhost'
 
 // Microsoft Auth Login
 let msftAuthWindow
@@ -161,6 +162,45 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGIN, (ipcEvent, ...arguments_) => {
 
     msftAuthWindow.removeMenu()
     msftAuthWindow.loadURL(`https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?prompt=select_account&client_id=${AZURE_CLIENT_ID}&response_type=code&scope=XboxLive.signin%20offline_access&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient`)
+})
+
+// Google Auth Login
+let gglAuthWindow
+ipcMain.on(GGL_OPCODE.OPEN_LOGIN, (ipcEvent) => {
+    if (gglAuthWindow) return
+    
+    gglAuthWindow = new BrowserWindow({
+        title: 'Login with Google',
+        width: 500,
+        height: 600,
+        frame: true
+    })
+
+    gglAuthWindow.on('closed', () => { gglAuthWindow = undefined })
+
+    gglAuthWindow.webContents.on('did-navigate', (_, uri) => {
+        if (uri.startsWith(GOOGLE_REDIRECT_URI)) {
+            const url = new URL(uri)
+            const code = url.searchParams.get('code')
+            if (code) {
+                ipcEvent.reply(GGL_OPCODE.REPLY_LOGIN, MSFT_REPLY_TYPE.SUCCESS, code)
+                gglAuthWindow.close()
+            }
+        }
+    })
+
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_REDIRECT_URI}&response_type=code&scope=profile%20email`
+    gglAuthWindow.loadURL(authUrl)
+})
+
+// Marketplace IPC
+ipcMain.handle(MARKET_OPCODE.FETCH_ALL, async () => {
+    // This would typically call a central API to get all available distributions
+    // For now, we return a list of featured server URLs
+    return [
+        { id: 'main', name: 'Xeno Official', url: 'https://helios-files.geekcorner.eu.org/distribution.json' },
+        { id: 'community', name: 'Community Pack', url: 'https://example.com/community.json' }
+    ]
 })
 
 // Microsoft Auth Logout

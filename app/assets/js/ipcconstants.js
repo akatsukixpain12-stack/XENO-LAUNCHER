@@ -3,6 +3,7 @@
 // SEE https://github.com/dscalzi/HeliosLauncher/blob/master/docs/MicrosoftAuth.md
 exports.AZURE_CLIENT_ID = '1ce6e35a-126f-48fd-97fb-54d143ac6d45'
 // SEE NOTE ABOVE.
+exports.GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'
 
 
 // Opcodes
@@ -11,6 +12,10 @@ exports.MSFT_OPCODE = {
     OPEN_LOGOUT: 'MSFT_AUTH_OPEN_LOGOUT',
     REPLY_LOGIN: 'MSFT_AUTH_REPLY_LOGIN',
     REPLY_LOGOUT: 'MSFT_AUTH_REPLY_LOGOUT'
+}
+exports.GGL_OPCODE = {
+    OPEN_LOGIN: 'GGL_AUTH_OPEN_LOGIN',
+    REPLY_LOGIN: 'GGL_AUTH_REPLY_LOGIN'
 }
 // Reply types for REPLY opcode.
 exports.MSFT_REPLY_TYPE = {
@@ -25,4 +30,8 @@ exports.MSFT_ERROR = {
 
 exports.SHELL_OPCODE = {
     TRASH_ITEM: 'TRASH_ITEM'
+}
+
+exports.MARKET_OPCODE = {
+    FETCH_ALL: 'MARKET_FETCH_ALL'
 }
